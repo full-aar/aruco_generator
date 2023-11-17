@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+from types import SimpleNamespace
 
 try:
   import cv2 as cv
@@ -25,20 +26,26 @@ def generate_markers(dictionary, args):
     marker_size_cm = args.size_cm
     canvas_size_cm = (canvas_bits / marker_full_bits) * marker_size_cm
 
+  canvas_size_cm += 2 * args.crop_mark_length_cm
+
   cm_per_bit = marker_size_cm / marker_full_bits
 
   marker_size_px = round(marker_size_cm * px_per_cm)
   canvas_size_px = round(canvas_size_cm * px_per_cm)
   border_size_px = round((canvas_size_cm - marker_size_cm) * 0.5 * px_per_cm)
+  crop_mark_length_px = round(args.crop_mark_length_cm * px_per_cm)
+  crop_mark_width_px = round(args.crop_mark_width_cm * px_per_cm)
 
-  if args.size_includes_margin:
-    marker_to_canvas_ratio = marker_size_cm/canvas_size_cm
+  # if args.size_includes_margin:
+  #   marker_to_canvas_ratio = marker_size_cm/canvas_size_cm
 
   print("generating marker images", file=sys.stderr)
   print(f"border bits: {args.border_bits}", file=sys.stderr)
   print(f"margin bits: {args.margin_bits}", file=sys.stderr)
   print(f"ppi: {args.ppi}", file=sys.stderr)
   print(f"marker size: {marker_size_cm:.03f} cm / {marker_size_px} px", file=sys.stderr)
+  print(f"crop mark length: {args.crop_mark_length_cm:.03f} cm / {crop_mark_length_px} px", file=sys.stderr)
+  print(f"crop mark width: {args.crop_mark_width_cm:.03f} cm / {crop_mark_width_px} px", file=sys.stderr)
   print(f"canvas size: {canvas_size_cm:.03f} cm / {canvas_size_px} px", file=sys.stderr)
   print(f"invert: {'yes' if args.invert else 'no'}")
 
@@ -54,10 +61,35 @@ def generate_markers(dictionary, args):
   marker_start_px = border_size_px
   marker_stop_px = marker_start_px + marker_size_px
 
+  # x,y,w,h
+  crop_mark_rect = (
+    0,
+    crop_mark_length_px - crop_mark_width_px,
+    crop_mark_length_px,
+    crop_mark_width_px
+  )
+  crop_mark_transforms = [
+    lambda x,y,w,h: (x,y,w,h),
+    lambda x,y,w,h: (canvas_size_px-w-x, y, w, h),
+    lambda x,y,w,h: (x, canvas_size_px-1-h-y, w, h),
+    lambda x,y,w,h: (canvas_size_px-w-x, canvas_size_px-1-h-y, w, h),
+  ]
+
   for i in range(args.num_markers):
     canvas_img[:,:] = 255
     marker = cv.aruco.generateImageMarker(dictionary, i, marker_size_px, marker_img, args.border_bits)
     canvas_img[marker_start_px:marker_stop_px, marker_start_px:marker_stop_px] = marker_img
+
+    if crop_mark_length_px > 0 and crop_mark_width_px > 0:
+      for transform in crop_mark_transforms:
+        x,y,w,h = transform(*crop_mark_rect)
+        y0 = y
+        y1 = y0 + h
+        x0 = x
+        x1 = x0 + w
+        canvas_img[y0:y1, x0:x1] = 0
+        canvas_img[x0:x1, y0:y1] = 0
+
     if args.invert:
       canvas_img = np.vectorize(lambda x: 255-x)(canvas_img)
 
@@ -99,11 +131,19 @@ def main():
   )
   arg_parser.add_argument(
     "-z", "--size-includes-margin", action=argparse.BooleanOptionalAction,
-    help="make --size_cm specify the size of the marker plus the margin, instead of only the marker"
+    help="make --size-cm specify the size of the marker plus the margin, instead of only the marker"
   )
   arg_parser.add_argument(
     "-i", "--invert", action=argparse.BooleanOptionalAction,
     help="invert each marker's colors"
+  )
+  arg_parser.add_argument(
+    "-l", "--crop-mark-length-cm", type=float, default=0.0,
+    help="length of crop marks in centimeters"
+  )
+  arg_parser.add_argument(
+    "-w", "--crop-mark-width-cm", type=float, default=0.05,
+    help="width of crop marks in centimeters"
   )
 
   args = arg_parser.parse_args()
