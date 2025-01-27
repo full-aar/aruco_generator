@@ -1,0 +1,37 @@
+{
+  "fetchPipMetadata": {
+    "sources": {
+      "numpy": {
+        "is_direct": false,
+        "sha256": "3074634ea4d6df66be04f6728ee1d173cfded75d002c75fac79503a880bf3825",
+        "type": "url",
+        "url": "https://files.pythonhosted.org/packages/2b/86/d019fb60a9d0f1d4cf04b014fe88a9135090adfadcc31c1fadbb071d7fa7/numpy-2.2.2-cp312-cp312-macosx_14_0_arm64.whl",
+        "version": "2.2.2"
+      },
+      "opencv-python": {
+        "is_direct": false,
+        "sha256": "432f67c223f1dc2824f5e73cdfcd9db0efc8710647d4e813012195dc9122a52a",
+        "type": "url",
+        "url": "https://files.pythonhosted.org/packages/05/4d/53b30a2a3ac1f75f65a59eb29cf2ee7207ce64867db47036ad61743d5a23/opencv_python-4.11.0.86-cp37-abi3-macosx_13_0_arm64.whl",
+        "version": "4.11.0.86"
+      },
+      "setuptools": {
+        "is_direct": false,
+        "sha256": "e3982f444617239225d675215d51f6ba05f845d4eec313da4418fdbb56fb27e3",
+        "type": "url",
+        "url": "https://files.pythonhosted.org/packages/69/8a/b9dc7678803429e4a3bc9ba462fa3dd9066824d3c607490235c6a796be5a/setuptools-75.8.0-py3-none-any.whl",
+        "version": "75.8.0"
+      }
+    },
+    "targets": {
+      "default": {
+        "numpy": [],
+        "opencv-python": [
+          "numpy"
+        ],
+        "setuptools": []
+      }
+    }
+  },
+  "invalidationHash": "5c7b2f983a14fa27c2ee4b0293e14afeef8ff7c309a80ac04a64478a09f12c20"
+}

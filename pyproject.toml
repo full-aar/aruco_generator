@@ -1,0 +1,14 @@
+[build-system]
+requires = [ "setuptools" ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aruco_generator"
+description = "generate aruco markers"
+version = "0.1"
+dependencies = [
+  "opencv-python >=4.8, <5"
+]
+
+[project.scripts]
+aruco_generator = "aruco_generator:main"

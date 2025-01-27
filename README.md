@@ -1,6 +1,22 @@
 # aruco_generator
 
-## setup with conda
+## setup
+
+### with nix
+
+```shell
+nix shell
+```
+
+in case this fails with a complaint about a missing lock file, run:
+
+```shell
+nix run .#default.lock
+```
+
+then `git add` the newly generated `lock.*.json` file and try again.
+
+### with conda
 
 ```shell
 conda create -n aruco_generator -c conda-forge python 'opencv>=4.8,<5'
